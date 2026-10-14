@@ -10,7 +10,6 @@ import com.fu.cinema.repository.CustomerRepository;
 import com.fu.cinema.repository.MovieRepository;
 import com.fu.cinema.repository.ReviewRepository;
 import com.fu.cinema.service.ReviewService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
 
@@ -26,6 +24,16 @@ public class ReviewServiceImpl implements ReviewService {
     private final BookingRepository bookingRepository;
     private final CustomerRepository customerRepository;
     private final MovieRepository movieRepository;
+
+    public ReviewServiceImpl(ReviewRepository reviewRepository,
+                             BookingRepository bookingRepository,
+                             CustomerRepository customerRepository,
+                             MovieRepository movieRepository) {
+        this.reviewRepository = reviewRepository;
+        this.bookingRepository = bookingRepository;
+        this.customerRepository = customerRepository;
+        this.movieRepository = movieRepository;
+    }
 
     @Override
     public List<Review> findByMovie(Long movieId) {
