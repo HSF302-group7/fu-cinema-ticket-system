@@ -15,7 +15,6 @@ import com.fu.cinema.repository.ShowtimeRepository;
 import com.fu.cinema.repository.TicketRepository;
 import com.fu.cinema.service.BookingService;
 import com.fu.cinema.util.ValidationUtils;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
@@ -45,12 +43,20 @@ public class BookingServiceImpl implements BookingService {
     private final CustomerRepository customerRepository;
     private final TicketRepository ticketRepository;
 
-    // ================= Customer =================
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
+            ShowtimeRepository showtimeRepository,
+            CustomerRepository customerRepository,
+            TicketRepository ticketRepository) {
+        this.bookingRepository = bookingRepository;
+        this.showtimeRepository = showtimeRepository;
+        this.customerRepository = customerRepository;
+        this.ticketRepository = ticketRepository;
+    }
 
     @Override
-    @Transactional                                               // BR-12: Booking + Ticket trong 1 transaction
+    @Transactional
     public Booking create(Long customerId, BookingRequest request) {
-        // 1. Chuẩn hoá & kiểm tra danh sách ghế
         List<String> seats = request.getSeatCodes().stream()
                 .filter(Objects::nonNull)
                 .map(s -> s.trim().toUpperCase())
@@ -64,14 +70,12 @@ public class BookingServiceImpl implements BookingService {
             throw new BusinessException("Mỗi đơn tối đa " + MAX_SEATS_PER_BOOKING + " ghế");
         }
 
-        // 2. Khoá suất chiếu (PESSIMISTIC_WRITE) → các yêu cầu đặt vé cùng suất được xử lý tuần tự
         Showtime showtime = showtimeRepository.findByIdForUpdate(request.getShowtimeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Suất chiếu", request.getShowtimeId()));
         if (showtime.getStatus() != ShowtimeStatus.OPEN || !showtime.getStartTime().isAfter(LocalDateTime.now())) {
-            throw new BusinessException("Suất chiếu không còn mở bán");                       // BR-10
+            throw new BusinessException("Suất chiếu không còn mở bán");
         }
 
-        // 3. Ghế phải tồn tại trong phòng
         int rows = showtime.getRoom().getTotalRows();
         int perRow = showtime.getRoom().getSeatsPerRow();
         for (String seat : seats) {
@@ -81,14 +85,12 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
-        // 4. Ghế chưa được bán (kiểm tra lại TRONG transaction, không tin dữ liệu từ form)
         Set<String> sold = new HashSet<>(ticketRepository.findSoldSeatCodes(showtime.getShowtimeId()));
         List<String> taken = seats.stream().filter(sold::contains).toList();
         if (!taken.isEmpty()) {
             throw new BusinessException("Ghế đã có người đặt: " + String.join(", ", taken));
         }
 
-        // 5. Độ tuổi (BR-11)
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Khách hàng", customerId));
         int minAge = showtime.getMovie().getAgeRating().getMinAge();
@@ -98,7 +100,6 @@ public class BookingServiceImpl implements BookingService {
                     + minAge + " tuổi trở lên");
         }
 
-        // 6. Tạo đơn + vé (cascade ALL → lưu Booking là lưu luôn Ticket)
         Booking booking = new Booking();
         booking.setCustomer(customer);
         booking.setShowtime(showtime);
@@ -121,7 +122,6 @@ public class BookingServiceImpl implements BookingService {
     public Booking getDetailForCustomer(Long bookingId, Long customerId) {
         Booking booking = getDetail(bookingId);
         if (!booking.getCustomer().getCustomerId().equals(customerId)) {
-            // Không tiết lộ đơn của người khác có tồn tại hay không → trả 404
             throw new ResourceNotFoundException("Đơn đặt vé", bookingId);
         }
         return booking;
@@ -135,12 +135,10 @@ public class BookingServiceImpl implements BookingService {
             throw new BusinessException("Đơn đã được huỷ trước đó");
         }
         if (LocalDateTime.now().isAfter(booking.getShowtime().getStartTime().minusHours(CANCEL_BEFORE_HOURS))) {
-            throw new BusinessException("Chỉ được huỷ đơn trước giờ chiếu ít nhất " + CANCEL_BEFORE_HOURS + " giờ"); // BR-14
+            throw new BusinessException("Chỉ được huỷ đơn trước giờ chiếu ít nhất " + CANCEL_BEFORE_HOURS + " giờ");
         }
         booking.setStatus(BookingStatus.CANCELLED);
     }
-
-    // ================= Admin =================
 
     @Override
     public Page<Booking> search(BookingStatus status, LocalDate fromDate, LocalDate toDate, String keyword, int page, int size) {
@@ -164,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void confirm(Long bookingId) {
         Booking booking = getDetail(bookingId);
-        if (booking.getStatus() != BookingStatus.PENDING) {                               // BR-13
+        if (booking.getStatus() != BookingStatus.PENDING) {
             throw new BusinessException("Chỉ xác nhận được đơn đang ở trạng thái PENDING");
         }
         booking.setStatus(BookingStatus.CONFIRMED);
