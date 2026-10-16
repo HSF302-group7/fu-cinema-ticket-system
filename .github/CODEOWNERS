@@ -1,0 +1,17 @@
+# Người sở hữu mặc định
+*                                                   @ngocthach324
+
+# Theo module
+/src/main/java/com/fu/cinema/entity/                @ngocthach324
+/pom.xml                                            @ngocthach324
+/src/main/resources/application.properties          @ngocthach324
+**/*Customer*                                       @ngocthach324
+**/*Profile*                                        @ngocthach324
+**/*Genre*                                          @ngocthach324
+**/*Movie*                                          @ngocthach324
+**/*Review*                                         @ngocthach324
+**/*Room*                                           @ngocthach324
+**/*Showtime*                                       @ngocthach324
+**/*Booking*                                        @ngocthach324
+**/*Ticket*                                         @ngocthach324
+**/*Report*                                         @ngocthach324
