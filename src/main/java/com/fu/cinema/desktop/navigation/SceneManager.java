@@ -43,10 +43,12 @@ public class SceneManager {
     }
 
     /**
-     * Nạp màn hình con vào vùng center của khung chính.
+     * Nạp màn hình con vào vùng center của khung chính và trả về Controller của màn hình đó.
      */
-    public void showIn(BorderPane host, View view) {
-        host.setCenter(load(view).root());
+    public <C> C showIn(BorderPane host, View view) {
+        Loaded<C> loaded = load(view);
+        host.setCenter(loaded.root());
+        return loaded.controller();
     }
 
     public <C> Loaded<C> load(View view) {

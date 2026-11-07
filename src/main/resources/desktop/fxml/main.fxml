@@ -1,35 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.fu.cinema.desktop.controller.MainController" styleClass="main">
-    <left>
-        <VBox styleClass="sidebar" spacing="6">
-            <Label text="FU CINEMA" styleClass="brand"/>
-            <Button text="Dashboard"        onAction="#onDashboard"   maxWidth="Infinity"/>
-            <Button text="Bán vé tại quầy"  onAction="#onCounterSale" maxWidth="Infinity" styleClass="primary"/>
-            <Button text="Đơn đặt vé"       onAction="#onBooking"     maxWidth="Infinity"/>
-            <Separator/>
-            <Button text="Thể loại"          onAction="#onGenre"       maxWidth="Infinity"/>
-            <Button text="Phim"              onAction="#onMovie"       maxWidth="Infinity"/>
-            <Button text="Phòng &amp; Suất chiếu" onAction="#onSchedule"   maxWidth="Infinity"/>
-            <Button text="Báo cáo"           onAction="#onReport"      maxWidth="Infinity"/>
-            <Region VBox.vgrow="ALWAYS"/>
-            <Button text="Đăng xuất"         onAction="#onLogout"      maxWidth="Infinity"/>
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.fu.cinema.desktop.controller.MainController">
+
+    <!-- Lớp chính của ứng dụng -->
+    <BorderPane fx:id="root" styleClass="main">
+        <left>
+            <VBox styleClass="sidebar" spacing="6">
+                <Label text="FU CINEMA" styleClass="brand"/>
+                <Button text="Dashboard"        onAction="#onDashboard"   maxWidth="Infinity"/>
+                <Button text="Bán vé tại quầy"  onAction="#onCounterSale" maxWidth="Infinity" styleClass="primary"/>
+                <Button text="Đơn đặt vé"       onAction="#onBooking"     maxWidth="Infinity"/>
+                <Separator/>
+                <Button text="Thể loại"          onAction="#onGenre"       maxWidth="Infinity"/>
+                <Button text="Phim"              onAction="#onMovie"       maxWidth="Infinity"/>
+                <Button text="Phòng &amp; Suất chiếu" onAction="#onSchedule"   maxWidth="Infinity"/>
+                <Button text="Báo cáo"           onAction="#onReport"      maxWidth="Infinity"/>
+                <Region VBox.vgrow="ALWAYS"/>
+                <Button text="Đăng xuất"         onAction="#onLogout"      maxWidth="Infinity"/>
+            </VBox>
+        </left>
+        <center>
+            <StackPane styleClass="page">
+                <Label text="Chào mừng đến với Hệ thống Quầy vé FU Cinema" styleClass="page-title"/>
+            </StackPane>
+        </center>
+        <bottom>
+            <HBox styleClass="status-bar" spacing="16">
+                <Label fx:id="lblUser"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblClock"/>
+            </HBox>
+        </bottom>
+    </BorderPane>
+
+    <!-- Lớp nổi AI: Floating Action Button + Chat Window (pickOnBounds="false" để không cản trở thao tác bên dưới) -->
+    <StackPane pickOnBounds="false">
+        <VBox alignment="BOTTOM_RIGHT" spacing="12" pickOnBounds="false" StackPane.alignment="BOTTOM_RIGHT">
+            <padding>
+                <Insets bottom="40" right="24"/>
+            </padding>
+
+            <!-- Cửa sổ Chat AI nổi -->
+            <VBox fx:id="aiChatWindow" styleClass="ai-chat-window" visible="false" managed="false" spacing="0">
+                <!-- Header -->
+                <HBox styleClass="ai-chat-header" alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🤖" style="-fx-font-size: 20px;"/>
+                    <VBox spacing="1" HBox.hgrow="ALWAYS">
+                        <Label text="Trợ lý AI FU Cinema" style="-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 13px;"/>
+                        <Label text="🟢 Trực tuyến · Google Gemini" style="-fx-font-size: 11px; -fx-text-fill: #10b981;"/>
+                    </VBox>
+                    <Button text="🗑️" onAction="#onClearAiChat" style="-fx-background-color: transparent; -fx-text-fill: #9ca3af; -fx-cursor: hand; -fx-padding: 4;"/>
+                    <Button text="✕" onAction="#onCloseAiChat" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 4;"/>
+                </HBox>
+
+                <!-- Vùng hiển thị tin nhắn -->
+                <ScrollPane fx:id="spChatScroll" fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: #ffffff; -fx-padding: 8;">
+                    <VBox fx:id="chatMessagesBox" spacing="10"/>
+                </ScrollPane>
+
+                <!-- Indicator đang suy nghĩ -->
+                <HBox fx:id="aiLoadingIndicator" visible="false" managed="false" alignment="CENTER_LEFT" spacing="8" style="-fx-padding: 6 12;">
+                    <ProgressIndicator prefWidth="16" prefHeight="16"/>
+                    <Label text="AI đang tìm câu trả lời..." style="-fx-font-size: 11px; -fx-text-fill: #6b7280; -fx-font-style: italic;"/>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Footer: Ô nhập liệu và nút gửi -->
+                <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 10 12; -fx-background-color: #f9fafb; -fx-background-radius: 0 0 14 14;">
+                    <TextField fx:id="tfAiInput" promptText="Hỏi về phim, suất chiếu, nội quy..." HBox.hgrow="ALWAYS"
+                               onAction="#onSendAiMessage" style="-fx-background-radius: 18; -fx-padding: 7 12; -fx-font-size: 12px;"/>
+                    <Button text="Gửi" onAction="#onSendAiMessage" styleClass="primary"
+                            style="-fx-background-radius: 18; -fx-padding: 7 14; -fx-font-size: 12px; -fx-cursor: hand;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Nút tròn nổi Floating Action Button (FAB) -->
+            <Button fx:id="btnAiFab" text="🤖" onAction="#onToggleAiChat" styleClass="ai-fab"/>
         </VBox>
-    </left>
-    <center>
-        <StackPane styleClass="page">
-            <Label text="Chào mừng đến với Hệ thống Quầy vé FU Cinema" styleClass="page-title"/>
-        </StackPane>
-    </center>
-    <bottom>
-        <HBox styleClass="status-bar" spacing="16">
-            <Label fx:id="lblUser"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="lblClock"/>
-        </HBox>
-    </bottom>
-</BorderPane>
+    </StackPane>
+</StackPane>
