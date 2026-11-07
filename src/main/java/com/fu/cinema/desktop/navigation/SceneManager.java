@@ -34,13 +34,17 @@ public class SceneManager {
         stage.show();
     }
 
-    /** Đổi toàn bộ nội dung cửa sổ (Login ↔ Main). */
+    /**
+     * Đổi toàn bộ nội dung cửa sổ (Login ↔ Main).
+     */
     public void switchTo(View view) {
         scene.setRoot(load(view).root());
         stage.setTitle(view.title());
     }
 
-    /** Nạp màn hình con vào vùng center của khung chính. */
+    /**
+     * Nạp màn hình con vào vùng center của khung chính.
+     */
     public void showIn(BorderPane host, View view) {
         host.setCenter(load(view).root());
     }
@@ -62,4 +66,3 @@ public class SceneManager {
 
     public record Loaded<C>(Parent root, C controller) {}
 }
-

@@ -110,6 +110,9 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     @Override
     public SeatMap getSeatMap(Long showtimeId) {
         Showtime s = findDetail(showtimeId);
+        if (s.getStatus() != ShowtimeStatus.OPEN || !s.getStartTime().isAfter(LocalDateTime.now())) {
+            throw new BusinessException("Suất chiếu không còn mở bán");
+        }
         List<String> rows = IntStream.range(0, s.getRoom().getTotalRows())
                 .mapToObj(i -> String.valueOf((char) ('A' + i)))
                 .toList();

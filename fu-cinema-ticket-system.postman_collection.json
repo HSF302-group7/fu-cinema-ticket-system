@@ -1,0 +1,423 @@
+{
+	"info": {
+		"_postman_id": "fu-cinema-ticket-system-api-test",
+		"name": "FU Cinema Ticket System - Test Suite",
+		"description": "Bộ kịch bản kiểm thử HTTP/API cho hệ thống FU Cinema Ticket System (HSF302)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "01. Public - Trang chủ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Nội dung trang chứa thương hiệu FU Cinema\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"FU Cinema\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "02. Public - Chi tiết phim Biệt Đội Siêu Tốc",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Hiển thị thông tin phim và lịch chiếu\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Biệt Đội Siêu Tốc\");",
+							"    pm.expect(pm.response.text()).to.include(\"Lịch chiếu\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/movies/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"movies",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "03. Security - Chưa đăng nhập truy cập trang vé khách hàng",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Chuyển hướng hoặc chặn truy cập trái phép\", function () {",
+							"    pm.expect([200, 302, 403]).to.include(pm.response.code);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/customer/bookings",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"customer",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "04. Auth - Đăng nhập Khách hàng (Session-based)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Đăng nhập thành công (Status 200/302)\", function () {",
+							"    pm.expect([200, 302]).to.include(pm.response.code);",
+							"});",
+							"pm.test(\"Đã lưu cookie session đăng nhập\", function () {",
+							"    pm.expect(pm.cookies.has(\"JSESSIONID\")).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "an.nv@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "Customer@123",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseUrl}}/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "05. Customer - Xem danh sách vé đã đặt",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Nội dung trang chứa tiêu đề Vé của tôi\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Vé của tôi\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/customer/bookings",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"customer",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "06. Security/RBAC - Khách hàng cố truy cập trang Admin (403 Forbidden)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bị chặn truy cập với mã 403 Forbidden\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/admin",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"admin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "07. Bug Verification - Chặn mở sơ đồ ghế suất quá khứ (Issue #59)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Chặn suất chiếu quá khứ và báo lỗi Suất chiếu không còn mở bán\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Suất chiếu không còn mở bán\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/customer/showtimes/1/seats",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"customer",
+						"showtimes",
+						"1",
+						"seats"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "08. Auth - Đăng xuất",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Đăng xuất thành công\", function () {",
+							"    pm.expect([200, 302]).to.include(pm.response.code);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/logout",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "09. Auth - Đăng nhập Quản trị viên (Admin)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Đăng nhập Admin thành công\", function () {",
+							"    pm.expect([200, 302]).to.include(pm.response.code);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "admin@fucinema.vn",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "Admin@123",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseUrl}}/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10. Admin - Truy cập Dashboard quản trị",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Truy cập thành công giao diện quản trị\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Dashboard\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/admin",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"admin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11. Admin - Báo cáo doanh thu theo mốc thời gian",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Trang hiển thị báo cáo doanh thu\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Báo cáo doanh thu\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/admin/reports?startDate=2026-10-01&endDate=2026-10-15",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"admin",
+						"reports"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "2026-10-01"
+						},
+						{
+							"key": "endDate",
+							"value": "2026-10-15"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

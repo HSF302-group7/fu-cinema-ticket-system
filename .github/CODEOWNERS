@@ -3,8 +3,10 @@
 
 # Theo module
 /src/main/java/com/fu/cinema/entity/                @ngocthach324
+/src/main/java/com/fu/cinema/desktop/               @ngocthach324
 /pom.xml                                            @ngocthach324
 /src/main/resources/application.properties          @ngocthach324
+/src/main/resources/desktop/                        @ngocthach324
 **/*Customer*                                       @ngocthach324
 **/*Profile*                                        @ngocthach324
 **/*Genre*                                          @ngocthach324

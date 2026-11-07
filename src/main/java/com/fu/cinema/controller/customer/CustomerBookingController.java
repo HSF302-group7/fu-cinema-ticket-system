@@ -34,7 +34,9 @@ public class CustomerBookingController {
     @PostMapping("/bookings")
     public String book(@Valid @ModelAttribute BookingRequest request, BindingResult br,
                        HttpSession session, RedirectAttributes ra) {
-        String back = "redirect:/customer/showtimes/" + request.getShowtimeId() + "/seats";
+        String back = request.getShowtimeId() != null
+                ? "redirect:/customer/showtimes/" + request.getShowtimeId() + "/seats"
+                : "redirect:/";
         if (br.hasErrors()) {
             ra.addFlashAttribute("error", br.getAllErrors().get(0).getDefaultMessage());
             return back;
