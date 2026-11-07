@@ -15,53 +15,64 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-/**
- * Component sơ đồ ghế trực quan (TODO 42).
- */
 public class SeatMapView extends VBox {
 
-    public static final int MAX_SEATS = 8; // BR-10
+    public static final int MAX_SEATS = 8; // BR-10: Mỗi đơn tối đa 8 ghế
     private static final PseudoClass SOLD = PseudoClass.getPseudoClass("sold");
 
     private final GridPane grid = new GridPane();
     private final ObservableList<String> selected = FXCollections.observableArrayList();
     private final ObservableList<String> selectedView = FXCollections.unmodifiableObservableList(selected);
 
-    public SeatMapView() { // constructor rỗng -> dùng được trong FXML
+    public SeatMapView() { // Constructor không tham số dùng được trực tiếp trong FXML
         getStyleClass().add("seat-map");
         setSpacing(12);
         setAlignment(Pos.TOP_CENTER);
+
         Label screen = new Label("MÀN HÌNH");
         screen.getStyleClass().add("screen");
         screen.setMaxWidth(Double.MAX_VALUE);
+
         grid.setHgap(4);
         grid.setVgap(4);
         grid.setAlignment(Pos.CENTER);
+
         getChildren().addAll(screen, grid, legend());
     }
 
-    /** Danh sách ghế đang chọn — màn hình khác chỉ được ĐỌC/bind. */
+    /**
+     * Danh sách ghế đang chọn — các màn hình khác chỉ được ĐỌC / bind.
+     */
     public ObservableList<String> getSelectedSeats() {
         return selectedView;
     }
 
+    /**
+     * Nạp dữ liệu và vẽ lại toàn bộ ma trận sơ đồ ghế thời gian thực.
+     */
     public void setData(SeatMapData data) {
         selected.clear();
         grid.getChildren().clear();
-        if (data == null) return;
+        if (data == null) {
+            return;
+        }
+
         for (int r = 0; r < data.rowLabels().size(); r++) {
             String row = data.rowLabels().get(r);
             Label rowLabel = new Label(row);
             rowLabel.getStyleClass().add("row-label");
             grid.add(rowLabel, 0, r);
+
             for (int c = 1; c <= data.seatsPerRow(); c++) {
-                String code = row + c; // A1, B12…
+                String code = row + c; // A1, A2, B12...
                 ToggleButton seat = new ToggleButton(String.valueOf(c));
                 seat.getStyleClass().add("seat");
                 seat.setTooltip(new Tooltip(code));
+
                 boolean sold = data.soldSeats().contains(code);
                 seat.pseudoClassStateChanged(SOLD, sold);
                 seat.setDisable(sold);
+
                 seat.selectedProperty().addListener((obs, was, is) -> onToggle(seat, code, is));
                 grid.add(seat, c, r);
             }
@@ -74,7 +85,7 @@ public class SeatMapView extends VBox {
             return;
         }
         if (selected.size() >= MAX_SEATS) {
-            seat.setSelected(false);
+            seat.setSelected(false); // listener tự chạy lại với false
             Platform.runLater(() -> AlertUtil.warn("Mỗi đơn tối đa " + MAX_SEATS + " ghế"));
             return;
         }
@@ -85,7 +96,8 @@ public class SeatMapView extends VBox {
         HBox box = new HBox(16,
                 legendItem("Trống", "legend-free"),
                 legendItem("Đang chọn", "legend-selected"),
-                legendItem("Đã bán", "legend-sold"));
+                legendItem("Đã bán", "legend-sold")
+        );
         box.setAlignment(Pos.CENTER);
         return box;
     }
@@ -96,4 +108,3 @@ public class SeatMapView extends VBox {
         return new Label(text, swatch);
     }
 }
-

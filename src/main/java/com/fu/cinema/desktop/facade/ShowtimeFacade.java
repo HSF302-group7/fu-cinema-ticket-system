@@ -3,9 +3,12 @@ package com.fu.cinema.desktop.facade;
 import com.fu.cinema.desktop.model.MovieItem;
 import com.fu.cinema.desktop.model.PageResult;
 import com.fu.cinema.desktop.model.RoomItem;
+import com.fu.cinema.desktop.model.SeatMapData;
 import com.fu.cinema.desktop.model.ShowtimeRow;
 import com.fu.cinema.desktop.session.DesktopSession;
+import com.fu.cinema.dto.SeatMap;
 import com.fu.cinema.dto.ShowtimeForm;
+import com.fu.cinema.entity.Showtime;
 import com.fu.cinema.service.MovieService;
 import com.fu.cinema.service.RoomService;
 import com.fu.cinema.service.ShowtimeService;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -46,6 +50,13 @@ public class ShowtimeFacade {
 
     public ShowtimeForm getForm(Long id) {
         return showtimeService.getForm(id);
+    }
+
+    public SeatMapData seatMap(Long showtimeId) {
+        SeatMap m = showtimeService.getSeatMap(showtimeId); // BR-10: suất không OPEN/đã bắt đầu -> BusinessException
+        Showtime s = m.getShowtime();
+        return new SeatMapData(showtimeId, s.getMovie().getTitle(), s.getRoom().getRoomName(), s.getStartTime(),
+                s.getTicketPrice(), List.copyOf(m.getRowLabels()), m.getSeatsPerRow(), Set.copyOf(m.getSoldSeats()));
     }
 
     @Transactional
