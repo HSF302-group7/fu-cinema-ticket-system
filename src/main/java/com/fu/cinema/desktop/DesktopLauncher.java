@@ -15,3 +15,4 @@ public final class DesktopLauncher {
         Application.launch(CinemaFxApp.class, args);
     }
 }
+

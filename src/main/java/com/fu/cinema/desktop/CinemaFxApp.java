@@ -34,3 +34,4 @@ public class CinemaFxApp extends Application {
         Platform.exit();
     }
 }
+
