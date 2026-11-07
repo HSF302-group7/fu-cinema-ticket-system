@@ -35,4 +35,12 @@ public class DesktopSession {
     }
 
     /**
-     * Defense in depth — kiểm tra quyền ở mọi thao tác ghi của Facade (BR
+     * Defense in depth — kiểm tra quyền ở mọi thao tác ghi của Facade (BR-D1).
+     */
+    public void requireAdmin() {
+        SessionUser u = user;
+        if (u == null || !u.isAdmin()) {
+            throw new BusinessException("Bạn không có quyền thực hiện thao tác này");
+        }
+    }
+}
