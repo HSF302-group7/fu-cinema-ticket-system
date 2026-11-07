@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class DesktopSession {
 
     private volatile SessionUser user; // Đọc được từ background thread
-    private final ReadOnlyStringWrapper displayName = new ReadOnlyStringWrapper("Quản trị viên (Admin)");
+    private final ReadOnlyStringWrapper displayName = new ReadOnlyStringWrapper("");
 
     public void login(SessionUser user) { // Gọi trên FX thread
         this.user = user;
@@ -35,12 +35,4 @@ public class DesktopSession {
     }
 
     /**
-     * Defense in depth — kiểm tra quyền ở mọi thao tác ghi của Facade (BR-D1).
-     */
-    public void requireAdmin() {
-        SessionUser u = user;
-        if (u == null || !u.isAdmin()) {
-            throw new BusinessException("Bạn không có quyền thực hiện thao tác này");
-        }
-    }
-}
+     * Defense in depth — kiểm tra quyền ở mọi thao tác ghi của Facade (BR
