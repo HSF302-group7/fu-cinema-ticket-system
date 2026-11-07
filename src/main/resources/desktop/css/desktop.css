@@ -131,6 +131,14 @@
     -fx-font-size: 12px;
 }
 
+.table-row-cell:stopped {
+    -fx-background-color: #eeeeee;
+}
+
+.table-row-cell:stopped .table-cell {
+    -fx-text-fill: #9e9e9e;
+}
+
 /* ========================================================================= */
 /* Sơ đồ ghế ma trận (SeatMapView - TODO 42)                                 */
 /* ========================================================================= */
