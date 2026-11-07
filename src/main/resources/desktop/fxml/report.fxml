@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-padding: 0;"
+            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.fu.cinema.desktop.controller.ReportController">
+    <VBox fx:id="root" spacing="16" styleClass="page">
+        <!-- Header & Thao tác xuất CSV -->
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <Label text="Báo cáo Doanh thu &amp; Thống kê" styleClass="page-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnExport" text="Xuất CSV" onAction="#onExport" styleClass="btn-success"/>
+        </HBox>
+
+        <!-- Thanh chọn khoảng thời gian và xem thống kê tổng hợp -->
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="filter-bar">
+            <Label text="Từ ngày:" styleClass="filter-label"/>
+            <DatePicker fx:id="dpStart" prefWidth="140"/>
+            <Label text="Đến ngày:" styleClass="filter-label"/>
+            <DatePicker fx:id="dpEnd" prefWidth="140"/>
+            <Button fx:id="btnGenerate" text="Xem báo cáo" onAction="#onGenerate" styleClass="primary"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblTotals" text="Đang tải dữ liệu..." styleClass="totals-text"/>
+        </HBox>
+
+        <!-- Thông báo khi kỳ không có dữ liệu -->
+        <Label fx:id="lblEmpty" text="Không có dữ liệu trong khoảng thời gian đã chọn"
+               styleClass="empty-banner" visible="false" managed="false"/>
+
+        <!-- Hai biểu đồ: Doanh thu theo phim & Tỷ trọng vé -->
+        <HBox spacing="16" prefHeight="280">
+            <VBox spacing="8" styleClass="chart-box" HBox.hgrow="ALWAYS">
+                <Label text="Doanh thu theo phim" styleClass="section-title"/>
+                <BarChart fx:id="chartRevenue" legendVisible="false" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis label="Phim"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Doanh thu (VNĐ)"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+
+            <VBox spacing="8" styleClass="chart-box" prefWidth="380">
+                <Label text="Tỷ trọng số vé bán ra" styleClass="section-title"/>
+                <PieChart fx:id="pieTickets" VBox.vgrow="ALWAYS" legendVisible="true"/>
+            </VBox>
+        </HBox>
+
+        <!-- Danh sách đơn đặt vé CONFIRMED trong kỳ -->
+        <VBox spacing="8" VBox.vgrow="ALWAYS">
+            <Label text="Danh sách đơn hàng đã xác nhận trong kỳ (CONFIRMED)" styleClass="section-title"/>
+            <TableView fx:id="tblBookings" minHeight="240" prefHeight="320" styleClass="data-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" text="#" prefWidth="60"/>
+                    <TableColumn fx:id="colBookingDate" text="Ngày đặt" prefWidth="150"/>
+                    <TableColumn fx:id="colCustomer" text="Khách hàng" prefWidth="180"/>
+                    <TableColumn fx:id="colMovie" text="Phim" prefWidth="250"/>
+                    <TableColumn fx:id="colTotal" text="Tổng tiền" prefWidth="140"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+                </columnResizePolicy>
+                <placeholder>
+                    <Label text="Không có đơn đặt vé nào trong khoảng thời gian đã chọn." styleClass="text-muted"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+    </VBox>
+</ScrollPane>
+
