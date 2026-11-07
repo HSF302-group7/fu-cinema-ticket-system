@@ -6,17 +6,13 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import org.springframework.stereotype.Component;
 
-/**
- * Quản lý phiên đăng nhập của ứng dụng Desktop (thay cho HttpSession của Web).
- * Singleton: 1 người dùng / 1 cửa sổ ứng dụng.
- */
 @Component
 public class DesktopSession {
 
-    private volatile SessionUser user; // Đọc được từ background thread
+    private volatile SessionUser user;
     private final ReadOnlyStringWrapper displayName = new ReadOnlyStringWrapper("");
 
-    public void login(SessionUser user) { // Gọi trên FX thread
+    public void login(SessionUser user) {
         this.user = user;
         displayName.set(user.getDisplayName());
     }
