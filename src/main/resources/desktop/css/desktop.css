@@ -216,4 +216,27 @@
     -fx-font-weight: bold;
 }
 
+.filter-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #374151;
+}
+
+.totals-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15803d;
+}
+
+.empty-banner {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16;
+    -fx-background-radius: 6;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+}
+
+
 
