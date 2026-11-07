@@ -216,4 +216,82 @@
     -fx-font-weight: bold;
 }
 
+/* ========================================================================= */
+/* AI Cinema Concierge & FAB (Bonus Part R)                                 */
+/* ========================================================================= */
+.ai-fab {
+    -fx-min-width: 54;
+    -fx-min-height: 54;
+    -fx-max-width: 54;
+    -fx-max-height: 54;
+    -fx-background-radius: 27;
+    -fx-background-color: linear-gradient(to bottom right, #e50914, #991b1b);
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.35), 14, 0, 0, 4);
+}
+
+.ai-fab:hover {
+    -fx-background-color: linear-gradient(to bottom right, #f43f5e, #dc2626);
+}
+
+.ai-chat-window {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.22), 22, 0, 0, 8);
+    -fx-pref-width: 390;
+    -fx-pref-height: 520;
+    -fx-max-width: 390;
+    -fx-max-height: 520;
+}
+
+.ai-chat-header {
+    -fx-background-color: #1f2937;
+    -fx-background-radius: 14 14 0 0;
+    -fx-padding: 10 14;
+}
+
+.ai-chat-bubble-user {
+    -fx-background-color: #e50914;
+    -fx-background-radius: 14 14 2 14;
+    -fx-padding: 8 12;
+}
+
+.ai-chat-bubble-user-text {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+}
+
+.ai-chat-bubble-bot {
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 14 14 14 2;
+    -fx-padding: 10 14;
+}
+
+.ai-chat-bubble-bot-text {
+    -fx-text-fill: #111827;
+    -fx-font-size: 13px;
+}
+
+.ai-action-btn {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #e50914;
+    -fx-border-color: #e50914;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+    -fx-padding: 5 10;
+}
+
+.ai-action-btn:hover {
+    -fx-background-color: #e50914;
+    -fx-text-fill: white;
+}
+
 
