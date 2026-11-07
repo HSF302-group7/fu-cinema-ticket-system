@@ -9,6 +9,7 @@ import com.fu.cinema.desktop.util.AlertUtil;
 import com.fu.cinema.desktop.util.FxAsync;
 import com.fu.cinema.desktop.util.MoneyUtil;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
@@ -126,5 +127,27 @@ public class CounterSaleController {
         price.set(null);
         seatMap.setData(null);
     }
+
+    /**
+     * Hỗ trợ điều hướng thông minh từ AI Chatbot: Tự động chọn phim và suất chiếu để mở sơ đồ ghế.
+     */
+    public void selectShowtime(Long showtimeId, String movieTitle) {
+        Platform.runLater(() -> {
+            cbMovie.getItems().stream()
+                    .filter(m -> m.title().equalsIgnoreCase(movieTitle) || movieTitle.contains(m.title()))
+                    .findFirst()
+                    .ifPresent(m -> {
+                        cbMovie.setValue(m);
+                        fxAsync.run(() -> facade.showtimes(m.id()), showtimes -> {
+                            cbShowtime.getItems().setAll(showtimes);
+                            showtimes.stream()
+                                    .filter(st -> st.id().equals(showtimeId))
+                                    .findFirst()
+                                    .ifPresent(cbShowtime::setValue);
+                        });
+                    });
+        });
+    }
 }
+
 
