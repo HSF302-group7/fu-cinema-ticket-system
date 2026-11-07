@@ -131,3 +131,19 @@
     -fx-font-size: 12px;
 }
 
+/* ========================================================================= */
+/* Sơ đồ ghế ma trận (SeatMapView - TODO 42)                                 */
+/* ========================================================================= */
+.seat-map        { -fx-padding: 12; }
+.screen          { -fx-background-color: #9ca3af; -fx-text-fill: white; -fx-alignment: center; -fx-padding: 4; -fx-font-weight: bold; -fx-background-radius: 4; }
+.seat            { -fx-min-width: 34; -fx-min-height: 30; -fx-background-color: #e5e7eb; -fx-background-radius: 6 6 2 2; -fx-font-size: 11px; }
+.seat:hover      { -fx-background-color: #d1d5db; }
+.seat:selected   { -fx-background-color: #16a34a; -fx-text-fill: white; }
+.seat:sold       { -fx-background-color: #6b7280; -fx-text-fill: white; -fx-opacity: 1; }   /* Ghi đè mờ 0.4 mặc định của :disabled */
+.legend-swatch   { -fx-min-width: 16; -fx-min-height: 16; -fx-background-radius: 3; }
+.legend-free     { -fx-background-color: #e5e7eb; }
+.legend-selected { -fx-background-color: #16a34a; }
+.legend-sold     { -fx-background-color: #6b7280; }
+.row-label       { -fx-font-weight: bold; -fx-padding: 0 8 0 0; -fx-text-fill: #374151; }
+
+
