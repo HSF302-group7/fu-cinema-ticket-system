@@ -13,3 +13,4 @@ public class StageReadyEvent extends ApplicationEvent {
         return (Stage) getSource();
     }
 }
+
