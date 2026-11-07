@@ -139,3 +139,7 @@
     -fx-text-fill: #9e9e9e;
 }
 
+.dialog-form {
+    -fx-padding: 16 20;
+}
+

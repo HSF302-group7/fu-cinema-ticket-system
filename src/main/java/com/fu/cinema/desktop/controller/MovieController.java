@@ -3,8 +3,11 @@ package com.fu.cinema.desktop.controller;
 import com.fu.cinema.desktop.facade.MovieFacade;
 import com.fu.cinema.desktop.model.GenreItem;
 import com.fu.cinema.desktop.model.MovieRow;
+import com.fu.cinema.desktop.navigation.SceneManager;
+import com.fu.cinema.desktop.navigation.View;
 import com.fu.cinema.desktop.util.AlertUtil;
 import com.fu.cinema.desktop.util.FxAsync;
+import com.fu.cinema.dto.MovieForm;
 import com.fu.cinema.enums.MovieStatus;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,6 +26,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
@@ -31,6 +35,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Scope("prototype")
@@ -42,6 +47,7 @@ public class MovieController {
 
     private final MovieFacade facade;
     private final FxAsync fxAsync;
+    private final SceneManager sceneManager;
 
     @FXML private TextField tfSearch;
     @FXML private ComboBox<GenreItem> cbGenre;
@@ -229,6 +235,23 @@ public class MovieController {
     }
 
     private void openDialog(Long movieId) {
-        AlertUtil.info("Chức năng thêm/sửa phim đang được hoàn thiện ở TODO 40");
+        Window owner = table.getScene().getWindow();
+        fxAsync.run(
+                () -> new Object[]{ facade.genres(), movieId == null ? new MovieForm() : facade.getForm(movieId) },
+                data -> {
+                    @SuppressWarnings("unchecked") List<GenreItem> genres = (List<GenreItem>) data[0];
+                    SceneManager.Loaded<MovieDialogController> dlg = sceneManager.load(View.MOVIE_DIALOG);
+                    dlg.controller().open(owner, (MovieForm) data[1], genres).ifPresent(form ->
+                            fxAsync.runVoid(
+                                    () -> facade.save(form),
+                                    () -> {
+                                        AlertUtil.info("Đã lưu phim thành công");
+                                        load(pagination.getCurrentPageIndex());
+                                    },
+                                    null
+                            )
+                    );
+                }
+        );
     }
 }
