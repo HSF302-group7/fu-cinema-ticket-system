@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane styleClass="login-root"
+           xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.fu.cinema.desktop.controller.LoginController"
+           prefWidth="850" prefHeight="650">
+
+    <VBox alignment="CENTER" spacing="20">
+        <!-- Card Đăng nhập cao cấp -->
+        <VBox fx:id="form" alignment="CENTER" spacing="14" styleClass="login-card" maxWidth="440">
+            <padding>
+                <Insets top="32" right="36" bottom="28" left="36"/>
+            </padding>
+
+            <!-- Brand Header -->
+            <VBox alignment="CENTER" spacing="4">
+                <Label text="🎬" style="-fx-font-size: 40px;"/>
+                <Label text="FU CINEMA" styleClass="login-brand"/>
+                <Label text="HỆ THỐNG QUẢN LÝ &amp; ĐẶT VÉ RẠP CHIẾU PHIM" styleClass="login-subtitle"/>
+            </VBox>
+
+            <Separator styleClass="login-divider"/>
+
+            <!-- Form Inputs -->
+            <VBox spacing="6" alignment="CENTER_LEFT" maxWidth="Infinity">
+                <Label text="Email đăng nhập" styleClass="input-label"/>
+                <TextField fx:id="tfUsername" promptText="admin@fucinema.vn hoặc email khách..."
+                           styleClass="login-field" maxWidth="Infinity"/>
+            </VBox>
+
+            <VBox spacing="6" alignment="CENTER_LEFT" maxWidth="Infinity">
+                <Label text="Mật khẩu" styleClass="input-label"/>
+                <PasswordField fx:id="pfPassword" promptText="••••••••"
+                               styleClass="login-field" maxWidth="Infinity"/>
+            </VBox>
+
+            <StackPane maxWidth="Infinity" style="-fx-padding: 6 0 0 0;">
+                <Button fx:id="btnLogin" text="ĐĂNG NHẬP" defaultButton="true" onAction="#onLogin"
+                        styleClass="login-submit-btn" maxWidth="Infinity"/>
+                <ProgressIndicator fx:id="progress" visible="false" prefWidth="24" prefHeight="24"
+                                   StackPane.alignment="CENTER_RIGHT" style="-fx-padding: 0 12 0 0;"/>
+            </StackPane>
+
+            <!-- Khung Điền Mẫu Nhanh Kiểm Thử (Rất tiện lợi cho giảng viên & test) -->
+            <VBox spacing="8" alignment="CENTER" styleClass="demo-box" maxWidth="Infinity">
+                <Label text="⚡ Điền nhanh tài khoản kiểm thử:" styleClass="demo-title"/>
+                <HBox spacing="10" alignment="CENTER" maxWidth="Infinity">
+                    <Button text="👑 Admin (Quản trị)" onAction="#onFillAdmin" styleClass="demo-btn" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button text="👤 Khách hàng (Có AI)" onAction="#onFillCustomer" styleClass="demo-btn" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                </HBox>
+            </VBox>
+
+            <!-- Footer ghi chú -->
+            <Label text="FU Cinema Desktop Application · JavaFX 21 &amp; Spring Boot" styleClass="login-footer-text"/>
+        </VBox>
+    </VBox>
+</StackPane>

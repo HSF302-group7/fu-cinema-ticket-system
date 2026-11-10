@@ -54,6 +54,7 @@ public class DataSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (accountRepository.count() > 0) {
+            refreshShowtimesIfExpired();
             return;
         }
         log.info(">>> Seeding sample data...");
@@ -98,6 +99,29 @@ public class DataSeeder implements CommandLineRunner {
         booking(an, s3, today, BookingStatus.PENDING, "B4");
 
         log.info(">>> Seed completed");
+    }
+
+    private void refreshShowtimesIfExpired() {
+        LocalDate today = LocalDate.now();
+        List<Showtime> future = showtimeRepository.findByMovie_MovieIdAndStatusAndStartTimeAfterOrderByStartTimeAsc(
+                1L, ShowtimeStatus.OPEN, LocalDateTime.now());
+        if (future.isEmpty()) {
+            log.info(">>> Refreshing expired showtimes to today and future dates...");
+            List<Showtime> all = showtimeRepository.findAll();
+            for (Showtime s : all) {
+                if (s.getStatus() == ShowtimeStatus.OPEN) {
+                    int dayOffset = (int) (s.getShowtimeId() % 3);
+                    LocalDateTime newStart = today.plusDays(dayOffset).atTime(s.getStartTime().toLocalTime());
+                    if (newStart.isBefore(LocalDateTime.now())) {
+                        newStart = newStart.plusDays(1);
+                    }
+                    long durationMinutes = java.time.Duration.between(s.getStartTime(), s.getEndTime()).toMinutes();
+                    s.setStartTime(newStart);
+                    s.setEndTime(newStart.plusMinutes(durationMinutes > 0 ? durationMinutes : 120));
+                    showtimeRepository.save(s);
+                }
+            }
+        }
     }
 
     private Customer customer(String name, String email, String mobile, LocalDate birthday, String cccd) {
