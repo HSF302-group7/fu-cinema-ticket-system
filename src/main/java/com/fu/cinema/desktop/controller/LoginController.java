@@ -45,7 +45,7 @@ public class LoginController {
         String username = tfUsername.getText().trim();
         String password = pfPassword.getText();
         progress.setVisible(true);
-        fxAsync.run(() -> authFacade.loginAdmin(username, password),
+        fxAsync.run(() -> authFacade.login(username, password),
                 user -> {
                     progress.setVisible(false);
                     session.login(user);
@@ -57,6 +57,18 @@ public class LoginController {
                     AlertUtil.showError(ex);
                 },
                 form); // khoá cả form khi đang đăng nhập
+    }
+
+    @FXML
+    private void onFillAdmin() {
+        tfUsername.setText("admin@fucinema.vn");
+        pfPassword.setText("Admin@123");
+    }
+
+    @FXML
+    private void onFillCustomer() {
+        tfUsername.setText("an.nv@gmail.com");
+        pfPassword.setText("Customer@123");
     }
 }
 

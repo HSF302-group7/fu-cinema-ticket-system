@@ -29,8 +29,9 @@ public class AiChatService {
 
     private static final List<String> MODEL_CANDIDATES = List.of(
             "gemini-flash-lite-latest",
-            "gemini-3.8-flash",
-            "gemini-flash-latest"
+            "gemini-flash-latest",
+            "gemini-3.5-flash",
+            "gemini-3.8-flash"
     );
     private static final String GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=";
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm dd/MM");
@@ -39,7 +40,7 @@ public class AiChatService {
     private final MovieService movieService;
     private final ShowtimeService showtimeService;
 
-    @Value("${gemini.api.key:}")
+    @Value("${gemini.api.key:${GEMINI_API_KEY:}}")
     private String apiKey;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -215,10 +216,13 @@ public class AiChatService {
         appendRealtimeMoviesAndShowtimes(sb);
 
         sb.append("\n=== HƯỚNG DẪN GỢI Ý ĐẶT VÉ (RẤT QUAN TRỌNG) ===\n");
-        sb.append("Khi người dùng nói họ muốn xem phim gì đó và nêu thời gian rảnh (ví dụ: 'Tôi muốn xem phim Mai, rảnh từ 18h đến 21h'), bạn hãy kiểm tra danh sách suất chiếu ở trên và gợi ý các suất phù hợp nhất.\n");
-        sb.append("Với MỖI suất chiếu bạn gợi ý, bạn BẮT BUỘC phải chèn một mã thẻ theo đúng cú pháp sau vào câu trả lời để hệ thống tạo nút Đặt vé:\n");
-        sb.append("[BOOK:showtimeId|tenPhim|tenPhong|gioChieu|giaVe]\n");
-        sb.append("Ví dụ: 'Tôi tìm thấy suất chiếu phù hợp cho bạn: [BOOK:12|Mai|Cinema 1|19:30 08/11|80000đ]'\n");
+        sb.append("Khi người dùng muốn đặt vé (ví dụ: 'tôi muốn đặt phim', 'tôi có thể đặt vé phim nào', 'gợi ý suất chiếu', hoặc hỏi về một phim cụ thể):\n");
+        sb.append("1. Bạn hãy kiểm tra kỹ danh sách DỮ LIỆU PHIM VÀ SUẤT CHIẾU THỰC TẾ ở trên.\n");
+        sb.append("2. Liệt kê các phim đang có suất chiếu và các khung giờ chiếu tương ứng.\n");
+        sb.append("3. Với MỖI suất chiếu bạn gợi ý, bạn BẮT BUỘC phải chèn một mã thẻ theo đúng cú pháp sau vào câu trả lời để giao diện tự động tạo nút bấm '🎬 Đặt vé':\n");
+        sb.append("   [BOOK:showtimeId|tenPhim|tenPhong|gioChieu|giaVe]\n");
+        sb.append("   Ví dụ: 'Tôi tìm thấy suất chiếu cho bạn: [BOOK:3|Biệt Đội Siêu Tốc|Room 01|18:00 10/11|80.000 VNĐ]'\n");
+        sb.append("4. Nhắc người dùng bấm vào nút suất chiếu để chọn số lượng vé và xác nhận đặt vé trực tiếp ngay trong khung chat.\n");
 
         return sb.toString();
     }

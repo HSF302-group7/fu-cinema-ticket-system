@@ -9,7 +9,7 @@
 
     <!-- Header & Thao tác duyệt / huỷ đơn -->
     <HBox alignment="CENTER_LEFT" spacing="12">
-        <Label text="Quản lý Đơn đặt vé" styleClass="page-title"/>
+        <Label fx:id="lblTitle" text="Quản lý Đơn đặt vé" styleClass="page-title"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnConfirm" text="Xác nhận đơn" onAction="#onConfirm" styleClass="btn-success"/>
         <Button fx:id="btnCancel" text="Huỷ đơn" onAction="#onCancel" styleClass="btn-danger"/>

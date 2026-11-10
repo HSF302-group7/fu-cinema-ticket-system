@@ -6,6 +6,7 @@ import com.fu.cinema.desktop.model.SaleResult;
 import com.fu.cinema.desktop.model.SeatMapData;
 import com.fu.cinema.desktop.model.ShowtimeItem;
 import com.fu.cinema.desktop.session.DesktopSession;
+import com.fu.cinema.dto.SessionUser;
 import com.fu.cinema.dto.BookingRequest;
 import com.fu.cinema.dto.SeatMap;
 import com.fu.cinema.entity.Booking;
@@ -61,11 +62,19 @@ public class CounterSaleFacade {
      */
     @Transactional // ⚠ Ghi đè readOnly để lưu vào Database
     public SaleResult sell(Long customerId, Long showtimeId, List<String> seats, boolean paid) {
-        session.requireAdmin();
+        SessionUser current = session.getUser();
+        Long targetCustomerId;
+        if (current != null && current.isCustomer()) {
+            targetCustomerId = current.getCustomerId() != null ? current.getCustomerId() : customerId;
+        } else {
+            session.requireAdmin();
+            targetCustomerId = customerId;
+        }
+
         BookingRequest request = new BookingRequest();
         request.setShowtimeId(showtimeId);
         request.setSeatCodes(new ArrayList<>(seats));
-        Booking booking = bookingService.create(customerId, request); // PENDING
+        Booking booking = bookingService.create(targetCustomerId, request); // PENDING
         if (paid) {
             bookingService.confirm(booking.getBookingId()); // BR-D2 -> CONFIRMED (cùng transaction)
         }

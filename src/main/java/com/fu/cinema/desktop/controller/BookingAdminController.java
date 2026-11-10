@@ -3,6 +3,8 @@ package com.fu.cinema.desktop.controller;
 import com.fu.cinema.desktop.facade.BookingFacade;
 import com.fu.cinema.desktop.model.BookingDetail;
 import com.fu.cinema.desktop.model.BookingRow;
+import com.fu.cinema.desktop.session.DesktopSession;
+import com.fu.cinema.dto.SessionUser;
 import com.fu.cinema.desktop.util.AlertUtil;
 import com.fu.cinema.desktop.util.FxAsync;
 import com.fu.cinema.desktop.util.MoneyUtil;
@@ -33,8 +35,10 @@ public class BookingAdminController {
 
     private final BookingFacade facade;
     private final FxAsync fxAsync;
+    private final DesktopSession session;
 
     @FXML private VBox root;
+    @FXML private Label lblTitle;
     @FXML private ComboBox<BookingStatus> cbStatus;
     @FXML private DatePicker dpFrom, dpTo;
     @FXML private TextField tfKeyword;
@@ -50,6 +54,16 @@ public class BookingAdminController {
 
     @FXML
     private void initialize() {
+        SessionUser user = session.getUser();
+        boolean isCustomer = user != null && user.isCustomer();
+        if (isCustomer) {
+            if (lblTitle != null) {
+                lblTitle.setText("Vé của tôi");
+            }
+            btnConfirm.setVisible(false);
+            btnConfirm.setManaged(false);
+        }
+
         setupFilterBar();
         setupTableColumns();
         setupActionBindings();

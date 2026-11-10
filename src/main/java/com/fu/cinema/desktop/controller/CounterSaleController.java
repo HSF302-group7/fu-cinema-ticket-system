@@ -5,6 +5,8 @@ import com.fu.cinema.desktop.facade.CounterSaleFacade;
 import com.fu.cinema.desktop.model.CustomerItem;
 import com.fu.cinema.desktop.model.MovieItem;
 import com.fu.cinema.desktop.model.ShowtimeItem;
+import com.fu.cinema.desktop.session.DesktopSession;
+import com.fu.cinema.dto.SessionUser;
 import com.fu.cinema.desktop.util.AlertUtil;
 import com.fu.cinema.desktop.util.FxAsync;
 import com.fu.cinema.desktop.util.MoneyUtil;
@@ -38,7 +40,9 @@ public class CounterSaleController {
 
     private final CounterSaleFacade facade;
     private final FxAsync fxAsync;
+    private final DesktopSession session;
 
+    @FXML private Label lblTitle;
     @FXML private TextField tfCustomer;
     @FXML private ListView<CustomerItem> lvCustomers;
     @FXML private ComboBox<MovieItem> cbMovie;
@@ -54,9 +58,8 @@ public class CounterSaleController {
 
     @FXML
     private void initialize() {
-        // (1) Tìm khách (debounce 300ms)
-        debounce.setOnFinished(e -> fxAsync.run(() -> facade.searchCustomers(tfCustomer.getText().trim()), lvCustomers.getItems()::setAll));
-        tfCustomer.textProperty().addListener((o, a, b) -> debounce.playFromStart());
+        SessionUser user = session.getUser();
+        boolean isCustomer = user != null && user.isCustomer();
 
         // (2) Chuỗi phụ thuộc phim -> suất -> ghế
         cbMovie.valueProperty().addListener((o, a, movie) -> {
@@ -79,31 +82,116 @@ public class CounterSaleController {
                 () -> "Ghế: " + String.join(", ", seatMap.getSelectedSeats().stream().sorted(CounterSaleFacade.SEAT_ORDER).toList()),
                 seatMap.getSelectedSeats()));
 
-        // (4) Nút bán chỉ bật khi đủ điều kiện và không đang xử lý
-        btnSell.disableProperty().bind(lvCustomers.getSelectionModel().selectedItemProperty().isNull()
-                .or(cbShowtime.valueProperty().isNull())
-                .or(Bindings.isEmpty(seatMap.getSelectedSeats()))
-                .or(busy));
+        if (isCustomer) {
+            if (lblTitle != null) {
+                lblTitle.setText("ĐẶT VÉ XEM PHIM");
+            }
+            btnSell.setText("Xác nhận đặt vé");
+            chkPaid.setSelected(false);
+            chkPaid.setVisible(false);
+            chkPaid.setManaged(false);
+
+            tfCustomer.setText(user.getDisplayName() != null ? user.getDisplayName() : "Khách hàng");
+            tfCustomer.setEditable(false);
+            tfCustomer.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #1e293b; -fx-font-weight: bold;");
+
+            lvCustomers.setVisible(false);
+            lvCustomers.setManaged(false);
+
+            // Nút đặt vé đối với Khách hàng: KHÔNG phụ thuộc lvCustomers!
+            // Chỉ cần: đã chọn suất chiếu + đã chọn ít nhất 1 ghế + không bận xử lý
+            btnSell.disableProperty().bind(cbShowtime.valueProperty().isNull()
+                    .or(Bindings.isEmpty(seatMap.getSelectedSeats()))
+                    .or(busy));
+        } else {
+            // ADMIN: Luồng bán vé tại quầy chuẩn
+            if (lblTitle != null) {
+                lblTitle.setText("BÁN VÉ TẠI QUẦY");
+            }
+            btnSell.setText("BÁN VÉ");
+            chkPaid.setVisible(true);
+            chkPaid.setManaged(true);
+            chkPaid.setSelected(true);
+
+            // Nút bán chỉ bật khi đủ điều kiện: chọn khách + chọn suất + chọn ghế + không bận
+            btnSell.disableProperty().bind(lvCustomers.getSelectionModel().selectedItemProperty().isNull()
+                    .or(cbShowtime.valueProperty().isNull())
+                    .or(Bindings.isEmpty(seatMap.getSelectedSeats()))
+                    .or(busy));
+
+            // (1) Tìm khách (debounce 300ms)
+            debounce.setOnFinished(e -> fxAsync.run(() -> facade.searchCustomers(tfCustomer.getText().trim()), lvCustomers.getItems()::setAll));
+            tfCustomer.textProperty().addListener((o, a, b) -> debounce.playFromStart());
+            fxAsync.run(() -> facade.searchCustomers(""), lvCustomers.getItems()::setAll);
+        }
 
         fxAsync.run(facade::movies, cbMovie.getItems()::setAll);
-        fxAsync.run(() -> facade.searchCustomers(""), lvCustomers.getItems()::setAll);
     }
 
     @FXML
     private void onSell() {
-        CustomerItem customer = lvCustomers.getSelectionModel().getSelectedItem();
+        SessionUser user = session.getUser();
+        boolean isCustomer = user != null && user.isCustomer();
+
+        Long customerId;
+        String customerName;
+
+        if (isCustomer) {
+            customerId = user.getCustomerId() != null ? user.getCustomerId() : 1L;
+            customerName = user.getDisplayName() != null ? user.getDisplayName() : "Khách hàng";
+        } else {
+            CustomerItem customer = lvCustomers.getSelectionModel().getSelectedItem();
+            if (customer == null) {
+                AlertUtil.showError(new IllegalStateException("Vui lòng chọn khách hàng trong danh sách."));
+                return;
+            }
+            customerId = customer.id();
+            customerName = customer.fullName();
+        }
+
         ShowtimeItem showtime = cbShowtime.getValue();
-        List<String> seats = List.copyOf(seatMap.getSelectedSeats());
-        boolean paid = chkPaid.isSelected();
-        if (!AlertUtil.confirm("Bán %d vé (%s) cho %s?".formatted(seats.size(), String.join(", ", seats), customer.fullName()))) {
+        if (showtime == null) {
+            AlertUtil.showError(new IllegalStateException("Vui lòng chọn suất chiếu."));
             return;
         }
+
+        List<String> seats = List.copyOf(seatMap.getSelectedSeats());
+        if (seats.isEmpty()) {
+            AlertUtil.showError(new IllegalStateException("Vui lòng chọn ít nhất một ghế."));
+            return;
+        }
+
+        // QUY TẮC CỐT LÕI:
+        // - Khách hàng (CUSTOMER) tự đặt vé: LUÔN LUÔN paid = false -> trạng thái PENDING để Admin duyệt!
+        // - Admin/Nhân viên bán vé tại quầy: paid theo Checkbox "Đã thanh toán" (BR-D2)
+        boolean paid = !isCustomer && chkPaid.isSelected();
+        String movieTitle = cbMovie.getValue() != null ? cbMovie.getValue().title() : "Phim";
+
+        String confirmPrompt = isCustomer
+                ? "Quý khách có chắc chắn muốn đặt %d vé (%s) cho phim \"%s\"?\n\n(Lưu ý: Đơn vé sẽ ở trạng thái PENDING chờ Admin duyệt)"
+                        .formatted(seats.size(), String.join(", ", seats), movieTitle)
+                : "Bán %d vé (%s) cho %s?".formatted(seats.size(), String.join(", ", seats), customerName);
+
+        if (!AlertUtil.confirm(confirmPrompt)) {
+            return;
+        }
+
         busy.set(true);
-        fxAsync.run(() -> facade.sell(customer.id(), showtime.id(), seats, paid),
+        fxAsync.run(() -> facade.sell(customerId, showtime.id(), seats, paid),
                 result -> {
                     busy.set(false);
-                    AlertUtil.info("Đơn #%d · Ghế %s · %s · %s".formatted(result.bookingId(),
-                            String.join(", ", result.seats()), MoneyUtil.format(result.total()), result.status()));
+                    if (isCustomer) {
+                        AlertUtil.info("🎉 Đặt vé thành công!\n\n" +
+                                "• Mã đơn vé: #" + result.bookingId() + "\n" +
+                                "• Phim: " + movieTitle + "\n" +
+                                "• Ghế đã đặt: " + String.join(", ", result.seats()) + "\n" +
+                                "• Tổng tiền: " + MoneyUtil.format(result.total()) + "\n" +
+                                "• Trạng thái: " + result.status() + " (Chờ Admin duyệt) ⏳\n\n" +
+                                "Đơn vé của bạn đã được lưu trên hệ thống và đang chờ Admin duyệt.");
+                    } else {
+                        AlertUtil.info("Đơn #%d · Ghế %s · %s · %s".formatted(result.bookingId(),
+                                String.join(", ", result.seats()), MoneyUtil.format(result.total()), result.status()));
+                    }
                     reloadSeatMap();
                 },
                 ex -> {

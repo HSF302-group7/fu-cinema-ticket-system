@@ -4,6 +4,7 @@ import com.fu.cinema.desktop.model.BookingDetail;
 import com.fu.cinema.desktop.model.BookingRow;
 import com.fu.cinema.desktop.model.PageResult;
 import com.fu.cinema.desktop.session.DesktopSession;
+import com.fu.cinema.dto.SessionUser;
 import com.fu.cinema.entity.Booking;
 import com.fu.cinema.entity.Showtime;
 import com.fu.cinema.entity.Ticket;
@@ -29,6 +30,11 @@ public class BookingFacade {
     private final DesktopSession session;
 
     public PageResult<BookingRow> search(BookingStatus status, LocalDate from, LocalDate to, String keyword, int page) {
+        SessionUser current = session.getUser();
+        if (current != null && current.isCustomer() && current.getCustomerId() != null) {
+            String customerKeyword = current.getDisplayName() != null ? current.getDisplayName() : keyword;
+            return PageResult.of(bookingService.search(status, from, to, customerKeyword, page, 15), BookingRow::from);
+        }
         return PageResult.of(bookingService.search(status, from, to, keyword, page, 15), BookingRow::from);
     }
 
@@ -61,8 +67,14 @@ public class BookingFacade {
 
     @Transactional
     public void cancel(Long id) {
-        session.requireAdmin();
-        bookingService.cancelByAdmin(id); // Tuân thủ BR-13
+        SessionUser current = session.getUser();
+        if (current != null && current.isCustomer()) {
+            Long customerId = current.getCustomerId() != null ? current.getCustomerId() : 1L;
+            bookingService.cancelByCustomer(id, customerId);
+        } else {
+            session.requireAdmin();
+            bookingService.cancelByAdmin(id); // Tuân thủ BR-13
+        }
     }
 }
 

@@ -12,6 +12,10 @@ public class AuthFacade {
 
     private final AuthService authService; // đã kiểm tra BCrypt + BR-03
 
+    public SessionUser login(String username, String password) {
+        return authService.login(username, password);
+    }
+
     public SessionUser loginAdmin(String username, String password) {
         SessionUser user = authService.login(username, password);
         if (!user.isAdmin()) { // BR-D1
